@@ -1,17 +1,40 @@
-Thank you for your interest in Beringer Technology Group.
-I'd like you to provide a code sample that will show off your ability to develop in Azure.
+# Salesforce to Azure Service Bus Function App
 
-Here's the requirements for your Function App:
-- Written in c#, and using the latest version of .NET
-- Timer triggerd, set to run every 30 minutes
-- Query the SalesForce API, and return data in a JSON format.  Here is the SalesForece API documentation:  https://www.integrate.io/blog/salesforce-rest-api-integration/
-- Store the JSON data in a service bus queue called DevTest.
-- Document the function app in a Readme.MD file
+## Overview
 
-There are sample credentials and connection strings in the local.settings.json file.
-Please clone this branch, and upload your completed Visual Studio project to this repository.  I should be able to clone your branch, then compile and run your project.
-Reach out to me with any questions.
-Good luck :)
+This Azure Function queries Salesforce data every 30 minutes and sends the JSON result to an Azure Service Bus queue named `DevTest`.
 
-Rob Hess
-rhess@beringer.net
+---
+
+## Features
+
+- Timer-triggered Azure Function (every 30 minutes)
+- Salesforce REST API Integration using SOQL
+- OAuth2-based Salesforce Authentication
+- Azure Service Bus Queue Integration
+- Structured and logged processing
+
+---
+
+## Requirements
+
+- .NET 8 SDK or latest
+- Azure Function Core Tools
+- Azure Subscription (for Service Bus)
+- Salesforce Developer Account and App Registration
+
+---
+
+## Configuration
+
+Update `local.settings.json` with:
+
+
+"ClientId": "",
+"ClientSecret": "",
+"Username": "",
+"Password": "",
+"SecurityToken": "",
+"LoginUrl": "https://login.salesforce.com/services/oauth2/callback",
+"InstanceUrl": "https://orgfarm-33d88c2b67-dev-ed.develop.lightning.force.com/lightning/page/home",
+"ServiceBusConnectionString": ""

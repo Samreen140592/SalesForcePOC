@@ -1,12 +1,17 @@
+
 {
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
     "FunctionTriggerSchedule": "*/30 * * * * *",
     "ServiceBusConnectionString": "Endpoint=sb://dsc00000075-datasynccloud-dev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5QiK9XMJMOxO8t6ojfd4rTeK3MR3COj4k+ASbHYuRfo=",
-    "clientId" : "3MVG9rZjd7MXFdLgf7.rnByfpxc.qdoJ0dksu077pUATWQy9QJxGoq1lPSRTxLB80VVrprp2j62WB48vdfYKf",
-    "clientSecret" : "87AC8561BC7AEA44E52AE8EB04FE2F079DDCB25BE010E282F474432B94CBE12D",
-    "instanceUrl" : "https://orgfarm-33d88c2b67-dev-ed.develop.lightning.force.com/lightning/page/home",
-    "ServiceBusQUeueURL" : "https://dsc00000075-datasynccloud-dev.servicebus.windows.net/devtest"
+    "clientId": "3MVG9rZjd7MXFdLgf7.rnByfpxc.qdoJ0dksu077pUATWQy9QJxGoq1lPSRTxLB80VVrprp2j62WB48vdfYKf",
+    "clientSecret": "87AC8561BC7AEA44E52AE8EB04FE2F079DDCB25BE010E282F474432B94CBE12D",
+    "Username": "samreenfarooqazam818@agentforce.com",
+    "Password": "LahoreCollege!23",
+    "SecurityToken": "your-security-token",
+    "LoginUrl": "https://login.salesforce.com/services/oauth2/callback",
+    "InstanceUrl": "https://orgfarm-33d88c2b67-dev-ed.develop.lightning.force.com/lightning/page/home",
+    "ServiceBusQUeueURL": "https://dsc00000075-datasynccloud-dev.servicebus.windows.net/devtest"
   }
 }
