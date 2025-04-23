@@ -9,7 +9,7 @@ Here's the requirements for your Function App:
 - Document the function app in a Readme.MD file
 
 There are sample credentials and connection strings in the local.settings.json file.
-Please clone this branch, and upload your completed Visual Studio project to this repository.  I should be able to clone your branch, then compile and run your project.
+Please fork this branch, and upload your completed Visual Studio project to your repository.  I should be able to clone your branch, then compile and run your project.
 Reach out to me with any questions.
 Good luck :)
 
