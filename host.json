@@ -5,8 +5,13 @@
             "samplingSettings": {
                 "isEnabled": true,
                 "excludedTypes": "Request"
-            },
-            "enableLiveMetricsFilters": true
+            }
+        },
+        "logLevel": {
+            "default": "Information",
+            "Host.Results": "Information",
+            "Function": "Information",
+            "Host.Aggregator": "Information"
         }
     }
 }

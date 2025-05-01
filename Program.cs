@@ -1,13 +1,28 @@
-using Microsoft.Azure.Functions.Worker.Builder;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var builder = FunctionsApplication.CreateBuilder(args);
+namespace SalesForceFunctionApp;
 
-builder.ConfigureFunctionsWebApplication();
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var host = new HostBuilder()
+            .ConfigureFunctionsWorkerDefaults()
+            .ConfigureAppConfiguration(config =>
+            {
+                config.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true);
+                config.AddEnvironmentVariables();
+            })
+            .ConfigureServices((context, services) =>
+            {
+                // Register HttpClientFactory
+                services.AddHttpClient();
 
-// Application Insights isn't enabled by default. See https://aka.ms/AAt8mw4.
-// builder.Services
-//     .AddApplicationInsightsTelemetryWorkerService()
-//     .ConfigureFunctionsApplicationInsights();
+                // Add any other service registrations here
+            })
+            .Build();
 
-builder.Build().Run();
+        host.Run();
+    }
+}
