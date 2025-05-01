@@ -1,65 +1,53 @@
 using System.Net.Http.Headers;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.Functions.Worker;
 using Newtonsoft.Json.Linq;
 
+namespace SalesForceFunctionApp;
 
-namespace SalesForceFunctionApp
+public class SalesforceToServiceBus
 {
-    public class SalesforceToServiceBus
+    private readonly ILogger _logger;
+    private readonly IConfiguration _config;
+    private readonly HttpClient _httpClient;
+
+    public SalesforceToServiceBus(
+        IHttpClientFactory httpClientFactory,
+        IConfiguration config,
+        ILogger<SalesforceToServiceBus> logger)
     {
-        private readonly ILogger _logger;
-        private readonly IConfiguration _config;
-        private static readonly HttpClient _httpClient = new();
-        public SalesforceToServiceBus(ILoggerFactory loggerFactory, IConfiguration config)
+        _logger = logger;
+        _config = config;
+        _httpClient = httpClientFactory.CreateClient();
+    }
+
+    [Function("SalesforceToServiceBus")]
+    public async Task RunAsync([TimerTrigger("0 */30 * * * *", RunOnStartup = true)] TimerInfo timer)
+    {
+        _logger.LogInformation($"Timer triggered at: {DateTime.UtcNow}");
+        try
         {
-            _logger = loggerFactory.CreateLogger<SalesforceToServiceBus>();
-            _config = config;
+            var accessToken = await GetSalesforceAccessTokenAsync();
+            var jsonData = await QuerySalesforceAsync(accessToken);
+            await SendToServiceBusAsync(jsonData);
         }
-
-        [Function("SalesforceToServiceBus")]
-        public async Task Run([TimerTrigger("0 */30 * * * *")] TimerInfo timer)
+        catch (Exception ex)
         {
-            _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-            try
-            {
-                var accessToken = await GetSalesforceAccessTokenAsync();
-                var jsonData = await QuerySalesforceAsync(accessToken);
-                await SendToServiceBusAsync(jsonData);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error: {ex.Message}", ex);
-            }
+            _logger.LogError(ex, "Failed to execute function");
         }
-        
-        private async Task<string> GetSalesforceAccessTokenAsync()
+    }
+
+    private async Task<string> GetSalesforceAccessTokenAsync()
+    {
+        var clientId = _config["clientId"];
+        var clientSecret = _config["clientSecret"];
+        var username = _config["Salesforce:Username"];
+        var password = _config["Password"];
+        var token = _config["SecurityToken"];
+        var loginUrl = "https://login.salesforce.com";
+
+        var content = new FormUrlEncodedContent(new[]
         {
-            string clientId = _config["ClientId"];
-            string clientSecret = _config["ClientSecret"];
-            string username = _config["Username"];
-            string password = _config["Password"];
-            string token = _config["SecurityToken"];
-            string loginUrl = _config["LoginUrl"];
-
-            // Validate config values
-            if (string.IsNullOrWhiteSpace(clientId))
-                throw new InvalidOperationException("Missing configuration: ClientId");
-            if (string.IsNullOrWhiteSpace(clientSecret))
-                throw new InvalidOperationException("Missing configuration: ClientSecret");
-            if (string.IsNullOrWhiteSpace(username))
-                throw new InvalidOperationException("Missing configuration: Username");
-            if (string.IsNullOrWhiteSpace(password))
-                throw new InvalidOperationException("Missing configuration: Password");
-            if (string.IsNullOrWhiteSpace(token))
-                throw new InvalidOperationException("Missing configuration: SecurityToken");
-            if (string.IsNullOrWhiteSpace(loginUrl))
-                throw new InvalidOperationException("Missing configuration: LoginUrl");
-
-            var content = new FormUrlEncodedContent(new[]
-            {
             new KeyValuePair<string, string>("grant_type", "password"),
             new KeyValuePair<string, string>("client_id", clientId),
             new KeyValuePair<string, string>("client_secret", clientSecret),
@@ -67,41 +55,44 @@ namespace SalesForceFunctionApp
             new KeyValuePair<string, string>("password", password + token)
         });
 
-            var response = await _httpClient.PostAsync($"{loginUrl}/services/oauth2/token", content);
-            response.EnsureSuccessStatusCode();
-
-            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
-            return result["access_token"]?.ToString();
-        }
-
-        private async Task<string> QuerySalesforceAsync(string accessToken)
+        var response = await _httpClient.PostAsync($"{loginUrl}/services/oauth2/token", content);
+        if (!response.IsSuccessStatusCode)
         {
-            var instanceUrl = _config["InstanceUrl"];
-            var query = "SELECT Id, Name FROM Account"; // Customize your SOQL query here
-
-            var request = new HttpRequestMessage(
-                HttpMethod.Get,
-                $"{instanceUrl}/services/data/v58.0/query?q={Uri.EscapeDataString(query)}");
-
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsStringAsync();
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogError($"Salesforce authentication failed with status code {response.StatusCode}. Response: {errorContent}");
+            throw new HttpRequestException($"Failed to authenticate with Salesforce: {errorContent}");
         }
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var result = JObject.Parse(responseContent);
+        return result["access_token"]?.ToString();
+    }
 
-        private async Task SendToServiceBusAsync(string message)
-        {
-            var connectionString = _config["ServiceBusConnectionString"];
-            var queueName = "DevTest";
+    private async Task<string> QuerySalesforceAsync(string accessToken)
+    {
+        var instanceUrl = "https://your-instance.salesforce.com";
+        var query = "SELECT Id, Name FROM Account LIMIT 5";
 
-            await using var client = new ServiceBusClient(connectionString);
-            var sender = client.CreateSender(queueName);
+        var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"{instanceUrl}/services/data/v58.0/query?q={Uri.EscapeDataString(query)}");
 
-            var serviceBusMessage = new ServiceBusMessage(message);
-            await sender.SendMessageAsync(serviceBusMessage);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync();
+    }
 
-            _logger.LogInformation("Message sent to Service Bus queue: DevTest");
-        }
+    private async Task SendToServiceBusAsync(string message)
+    {
+        var connectionString = _config["ServiceBusConnectionString"];
+        var queueName = "DevTest";
+
+        await using var client = new ServiceBusClient(connectionString);
+        var sender = client.CreateSender(queueName);
+
+        var sbMessage = new ServiceBusMessage(message);
+        await sender.SendMessageAsync(sbMessage);
+
+        _logger.LogInformation("Sent message to Service Bus.");
     }
 }
