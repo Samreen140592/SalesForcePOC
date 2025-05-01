@@ -1,12 +1,17 @@
 {
-  "IsEncrypted": false,
-  "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "FunctionTriggerSchedule": "*/30 * * * * *",
-    "ServiceBusConnectionString": "Endpoint=sb://dsc00000075-datasynccloud-dev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5QiK9XMJMOxO8t6ojfd4rTeK3MR3COj4k+ASbHYuRfo=",
-    "clientId" : "3MVG9rZjd7MXFdLgf7.rnByfpxc.qdoJ0dksu077pUATWQy9QJxGoq1lPSRTxLB80VVrprp2j62WB48vdfYKf",
-    "clientSecret" : "87AC8561BC7AEA44E52AE8EB04FE2F079DDCB25BE010E282F474432B94CBE12D",
-    "instanceUrl" : "https://orgfarm-33d88c2b67-dev-ed.develop.lightning.force.com/lightning/page/home",
-    "ServiceBusQUeueURL" : "https://dsc00000075-datasynccloud-dev.servicebus.windows.net/devtest"
-  }
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+        "FunctionTriggerSchedule": "0 */30 * * * *",
+        "ServiceBusConnectionString": "Endpoint=sb://dsc00000075-datasynccloud-dev.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5QiK9XMJMOxO8t6ojfd4rTeK3MR3COj4k+ASbHYuRfo=",
+        "clientId": "3MVG9dAEux2v1sLstwDDWYrRSC__JGSlM7xjyrV9zfIa4bA14wofchqrTjvCsuTVRGgcqLNb_XyGV3tuUoxxv",
+        "clientSecret": "43BB07568B16BF27AB7704D876E6D3A068ABB2C8235DE5B9F99EDCEB1F78766C",
+        "Salesforce:Username": "fkhaqwani152@agentforce.com",
+        "Password": "wordpress666#",
+        "SecurityToken": "NXVGS6ajWiZxZLNcPvac7DVg",
+        "LoginUrl": "https://login.salesforce.com",
+        "ServiceBusQUeueURL": "https://dsc00000075-datasynccloud-dev.servicebus.windows.net/devtest",
+
+    }
 }
